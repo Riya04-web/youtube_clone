@@ -1,0 +1,345 @@
+/* ===========================
+   GLOBAL
+=========================== */
+
+*{
+    transition: background .3s,color .3s,border .3s;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+}
+
+/* ===========================
+   LIGHT THEME
+=========================== */
+
+body.light-theme{
+    background:#f5f5f5;
+    color:#222;
+}
+
+body.light-theme .navbar{
+    background:#ffffff !important;
+    box-shadow:0 2px 15px rgba(0,0,0,.08);
+}
+
+body.light-theme .navbar-brand,
+body.light-theme .nav-link{
+    color:#222 !important;
+}
+
+body.light-theme .card,
+body.light-theme .video-card,
+body.light-theme .plan-card,
+body.light-theme .welcome-card,
+body.light-theme .stats-card,
+body.light-theme .profile-card,
+body.light-theme .info-card,
+body.light-theme .custom-player{
+    background:#ffffff;
+    color:#222;
+    border:1px solid #e5e5e5;
+}
+
+body.light-theme input,
+body.light-theme textarea,
+body.light-theme select{
+    background:white;
+    color:#222;
+    border:1px solid #ccc;
+}
+
+body.light-theme .text-muted{
+    color:#666 !important;
+}
+
+body.light-theme .hero{
+    background:linear-gradient(135deg,#ff0000,#c40000);
+    color:white;
+}
+
+body.light-theme footer{
+    background:#ffffff;
+    color:#222;
+}
+
+/* ===========================
+   DARK THEME
+=========================== */
+
+body.dark-theme{
+    background:#0f0f0f;
+    color:white;
+}
+
+body.dark-theme .navbar{
+    background:#181818 !important;
+    box-shadow:0 2px 15px rgba(0,0,0,.5);
+}
+
+body.dark-theme .navbar-brand,
+body.dark-theme .nav-link{
+    color:white !important;
+}
+
+body.dark-theme .card,
+body.dark-theme .video-card,
+body.dark-theme .plan-card,
+body.dark-theme .welcome-card,
+body.dark-theme .stats-card,
+body.dark-theme .profile-card,
+body.dark-theme .info-card,
+body.dark-theme .custom-player{
+    background:#202020;
+    color:white;
+    border:1px solid #333;
+}
+
+body.dark-theme input,
+body.dark-theme textarea,
+body.dark-theme select{
+    background:#2b2b2b;
+    color:white;
+    border:1px solid #555;
+}
+
+body.dark-theme input::placeholder,
+body.dark-theme textarea::placeholder{
+    color:#aaa;
+}
+
+body.dark-theme .text-muted{
+    color:#cfcfcf !important;
+}
+
+body.dark-theme .hero{
+    background:linear-gradient(135deg,#101010,#202020);
+    color:white;
+}
+
+body.dark-theme footer{
+    background:#181818;
+    color:white;
+}
+
+/* ===========================
+   BUTTONS
+=========================== */
+
+.btn-danger{
+    background:#ff0000;
+    border:none;
+}
+
+.btn-danger:hover{
+    background:#cc0000;
+}
+
+.btn-primary{
+    border:none;
+}
+
+.btn-success{
+    border:none;
+}
+
+/* ===========================
+   LINKS
+=========================== */
+
+a{
+    text-decoration:none;
+}
+
+body.dark-theme a{
+    color:#7ab7ff;
+}
+
+body.light-theme a{
+    color:#0d6efd;
+}
+
+/* ===========================
+   TABLES
+=========================== */
+
+body.dark-theme table{
+    color:white;
+}
+
+body.dark-theme .table{
+    color:white;
+}
+
+/* ===========================
+   MODALS
+=========================== */
+
+body.dark-theme .modal-content{
+    background:#202020;
+    color:white;
+}
+
+body.light-theme .modal-content{
+    background:white;
+}
+
+/* ===========================
+   DROPDOWNS
+=========================== */
+
+body.dark-theme .dropdown-menu{
+    background:#202020;
+}
+
+body.dark-theme .dropdown-item{
+    color:white;
+}
+
+body.dark-theme .dropdown-item:hover{
+    background:#333;
+}
+
+/* ===========================
+   ALERTS
+=========================== */
+
+.alert{
+    border-radius:12px;
+}
+
+/* Theme Settings Card */
+
+.theme-card{
+    border-radius:18px;
+    margin-top:30px;
+}
+
+.theme-card .card-body{
+    padding:30px;
+}
+
+.theme-card h4{
+    font-weight:700;
+    margin-bottom:25px;
+}
+
+.theme-select{
+    border-radius:12px;
+    padding:12px 15px;
+    font-size:16px;
+}
+
+.theme-select:focus{
+    border-color:#ff0000;
+    box-shadow:0 0 0 .2rem rgba(255,0,0,.15);
+}
+
+.theme-card button{
+    border-radius:12px;
+    font-weight:600;
+    padding:10px 28px;
+}
+
+/* Theme Card */
+
+.theme-card{
+    border-radius:18px;
+}
+
+.theme-card .card-body{
+    padding:30px;
+}
+
+.theme-card h3{
+    font-weight:700;
+    margin-bottom:25px;
+}
+
+.theme-select{
+    border-radius:12px;
+    padding:12px;
+    height:50px;
+    font-size:16px;
+}
+
+.theme-select:focus{
+    border-color:#ff0000;
+    box-shadow:0 0 10px rgba(255,0,0,.2);
+}
+
+.theme-card button{
+    height:50px;
+    border-radius:12px;
+    font-weight:600;
+}
+
+/* =========================
+   ADMIN DASHBOARD
+========================= */
+
+.admin-header {
+    padding: 10px 5px;
+}
+
+.admin-header h2 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.admin-header p {
+    color: #777;
+    margin: 0;
+    font-size: 15px;
+}
+
+/* Statistics cards */
+
+.admin-dashboard .card {
+    border-radius: 14px;
+    transition: 0.25s ease;
+}
+
+.admin-dashboard .card:hover {
+    transform: translateY(-4px);
+}
+
+/* Admin buttons */
+
+.admin-action-btn {
+    display: inline-block;
+    padding: 11px 20px;
+    border-radius: 8px;
+    background: #dc3545;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.25s ease;
+}
+
+.admin-action-btn:hover {
+    background: #bb2d3b;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Reported comments */
+
+.admin-dashboard .card-header {
+    font-weight: 600;
+    padding: 14px 18px;
+}
+
+.admin-dashboard table {
+    margin-bottom: 0;
+}
+
+.admin-dashboard table th {
+    font-weight: 600;
+}
+
+.admin-dashboard table td {
+    vertical-align: middle;
+}

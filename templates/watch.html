@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>{{ video.title }}</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/player.css') }}">
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='css/theme.css') }}">
+
+
+
+
+<style>
+
+
+.navbar{
+
+box-shadow:0 8px 20px rgba(0,0,0,.15);
+
+}
+
+.video-card{
+
+background:white;
+
+padding:25px;
+
+border-radius:18px;
+
+box-shadow:0 12px 30px rgba(0,0,0,.08);
+
+margin-top:30px;
+
+}
+
+.video-player{
+
+border-radius:18px;
+
+overflow:hidden;
+
+background:black;
+
+}
+
+.info-card{
+
+background:white;
+
+border:none;
+
+border-radius:15px;
+
+box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+padding:20px;
+
+margin-top:25px;
+
+}
+
+.stats-card{
+
+border:none;
+
+border-radius:15px;
+
+box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+padding:20px;
+
+text-align:center;
+
+transition:.3s;
+
+}
+
+.stats-card:hover{
+
+transform:translateY(-5px);
+
+}
+
+.action-btn{
+
+border-radius:12px;
+
+font-weight:600;
+
+padding:12px;
+
+}
+
+.comment-box{
+
+border-radius:15px;
+
+border:1px solid #ddd;
+
+padding:15px;
+
+}
+
+.comment-card{
+
+border:none;
+
+border-radius:15px;
+
+box-shadow:0 6px 18px rgba(0,0,0,.08);
+
+margin-bottom:20px;
+
+}
+
+.plan-card{
+
+border-radius:15px;
+
+padding:20px;
+
+background:linear-gradient(135deg,#ffffff,#f8f9fa);
+
+box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+}
+
+footer{
+
+margin-top:60px;
+
+}
+
+.badge-plan{
+
+font-size:14px;
+
+padding:8px 14px;
+
+border-radius:25px;
+
+}
+
+
+</style>
+
+</head>
+
+<body class="{{ 'dark-theme' if session.get('theme')=='dark' else 'light-theme' }}">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+
+<div class="container">
+
+<a class="navbar-brand fw-bold fs-3" href="/">
+
+🎥 YouTube Clone
+
+</a>
+
+<div class="ms-auto">
+
+<a href="/" class="btn btn-light rounded-pill">
+
+🏠 Home
+
+</a>
+
+</div>
+
+</div>
+
+</nav>
+
+<div class="container">
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+
+{% if messages %}
+
+{% for category,message in messages %}
+
+<div class="alert alert-{{category}} alert-dismissible fade show mt-4">
+
+{{message}}
+
+<button class="btn-close" data-bs-dismiss="alert"></button>
+
+</div>
+
+{% endfor %}
+
+{% endif %}
+
+{% endwith %}
+
+<div class="video-card">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+<div>
+
+<h2 class="fw-bold">
+
+{{ video.title }}
+
+</h2>
+
+<p class="text-muted mb-0">
+
+Uploaded by
+
+<strong>{{ video.user.username }}</strong>
+
+</p>
+
+</div>
+
+<div>
+
+{% if video.is_premium %}
+
+<span class="badge bg-warning text-dark badge-plan">
+
+🔒 PREMIUM
+
+</span>
+
+{% else %}
+
+<span class="badge bg-success badge-plan">
+
+FREE
+
+</span>
+
+{% endif %}
+
+</div>
+
+</div>
+
+<div id="theaterWrapper">
+
+    <div class="custom-player" id="playerContainer">
+
+    <video id="videoPlayer" class="main-video">
+        <source src="/static/uploads/{{ video.filename }}" type="video/mp4">
+    </video>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="center-play" id="centerPlay">
+        ▶
+    </div>
+
+    <div class="player-controls" id="playerControls">
+
+        <div class="progress-container">
+
+            <input type="range" id="progressBar" min="0" max="100" value="0">
+
+        </div>
+
+        <div class="controls-row">
+
+            <div class="left-controls">
+
+                <button id="playPauseBtn" class="control-btn">▶</button>
+
+                <button id="rewindBtn" class="control-btn">⏪</button>
+
+                <button id="forwardBtn" class="control-btn">⏩</button>
+
+                <div class="volume-wrapper">
+
+                    <span>🔊</span>
+
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+
+                </div>
+
+                <div class="time-display">
+
+                    <span id="currentTime">00:00</span>
+
+                    /
+
+                    <span id="duration">00:00</span>
+
+                </div>
+
+            </div>
+
+            <div class="right-controls">
+
+    <select id="speedControl" class="speed-select">
+
+        <option value="0.5">0.5×</option>
+        <option value="0.75">0.75×</option>
+        <option value="1" selected>1×</option>
+        <option value="1.25">1.25×</option>
+        <option value="1.5">1.5×</option>
+        <option value="2">2×</option>
+
+    </select>
+
+    <button id="theaterBtn" class="control-btn">
+        🎬
+    </button>
+
+    <button id="fullscreenBtn" class="control-btn">
+        ⛶
+    </button>
+
+</div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="info-card">
+
+<h4 class="fw-bold mb-3">
+
+📄 Description
+
+</h4>
+
+<p class="text-secondary">
+
+{{ video.description }}
+
+</p>
+
+</div>
+
+{% if next_video %}
+
+<div class="card shadow-sm border-0 mt-4">
+    <div class="card-body">
+
+        <h5 class="fw-bold mb-3">
+            ▶ Up Next
+        </h5>
+
+        <div class="row align-items-center">
+
+            <div class="col-md-4">
+                <img
+                    src="/static/uploads/{{ next_video.thumbnail }}"
+                    class="img-fluid rounded"
+                    style="height:120px;width:100%;object-fit:cover;"
+                >
+            </div>
+
+            <div class="col-md-8">
+
+                <h5>{{ next_video.title }}</h5>
+
+                <p class="text-muted mb-2">
+                    {{ next_video.user.username }}
+                </p>
+
+                <a href="/watch/{{ next_video.id }}"
+                   class="btn btn-danger">
+                    Watch Next ▶
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endif %}
+
+<div class="row mt-4">
+
+<div class="col-md-4 mb-3">
+
+<div class="stats-card">
+
+<h2>
+
+👁
+
+</h2>
+
+<h4>
+
+{{ video.views }}
+
+</h4>
+
+<p class="text-muted mb-0">
+
+Views
+
+</p>
+
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="stats-card">
+
+<h2>
+
+👍
+
+</h2>
+
+<h4>
+
+{{ video.likes }}
+
+</h4>
+
+<p class="text-muted mb-0">
+
+Likes
+
+</p>
+
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="stats-card">
+
+<h2>
+
+👎
+
+</h2>
+
+<h4>
+
+{{ video.dislikes }}
+
+</h4>
+
+<p class="text-muted mb-0">
+
+Dislikes
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="row mt-4">
+
+<div class="col-lg-8">
+
+<div class="row g-3">
+
+<div class="col-md-6">
+
+<a href="/download/{{ video.id }}"
+class="btn btn-success action-btn w-100">
+
+⬇ Download Video
+
+</a>
+
+</div>
+
+<div class="col-md-6">
+
+<a href="{{ url_for('watchparty.watchparty_home', video_id=video.id) }}"
+class="btn btn-warning action-btn w-100">
+
+🎥 Watch Party
+
+</a>
+
+</div>
+
+<div class="col-md-6">
+
+<a href="/like/{{ video.id }}"
+class="btn btn-primary action-btn w-100">
+
+👍 Like ({{ video.likes }})
+
+</a>
+
+</div>
+
+<div class="col-md-6">
+
+<a href="/dislike/{{ video.id }}"
+class="btn btn-danger action-btn w-100">
+
+👎 Dislike ({{ video.dislikes }})
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-lg-4">
+
+<div class="plan-card">
+
+<h4 class="fw-bold mb-3">
+
+⭐ Your Subscription
+
+</h4>
+
+{% if user.plan.lower() == "gold" %}
+
+<span class="badge bg-warning text-dark fs-6">
+
+🥇 GOLD MEMBER
+
+</span>
+
+<p class="mt-3 mb-0">
+
+Unlimited downloads<br>
+
+Premium videos<br>
+
+Ad-free experience
+
+</p>
+
+{% elif user.plan.lower() == "silver" %}
+
+<span class="badge bg-secondary fs-6">
+
+🥈 SILVER MEMBER
+
+</span>
+
+<p class="mt-3 mb-0">
+
+15 Downloads / Day<br>
+
+Premium videos
+
+</p>
+
+{% elif user.plan.lower() == "bronze" %}
+
+<span class="badge text-dark fs-6"
+style="background:#cd7f32;">
+
+🥉 BRONZE MEMBER
+
+</span>
+
+<p class="mt-3 mb-0">
+
+5 Downloads / Day<br>
+
+Premium videos
+
+</p>
+
+{% else %}
+
+<span class="badge bg-success fs-6">
+
+🆓 FREE PLAN
+
+</span>
+
+<p class="mt-3">
+
+1 Download / Day
+
+</p>
+
+<a href="/subscription"
+class="btn btn-danger w-100">
+
+Upgrade Plan
+
+</a>
+
+{% endif %}
+
+</div>
+
+</div>
+
+</div>
+
+<hr class="my-5">
+
+<h3 class="fw-bold">
+
+💬 Comments
+
+</h3>
+
+<form method="POST" class="mb-4">
+
+<textarea
+name="comment"
+rows="4"
+class="form-control comment-box"
+placeholder="Write your thoughts here..."
+required></textarea>
+
+<button class="btn btn-danger mt-3 px-4">
+
+Post Comment
+
+</button>
+
+</form>
+
+{% for comment in comments %}
+
+<div class="card comment-card">
+
+<div class="card-body">
+
+<div class="d-flex justify-content-between align-items-start">
+
+<div>
+
+<h5 class="fw-bold mb-1">
+
+👤 {{ comment.username }}
+
+</h5>
+
+<small class="text-muted">
+
+🕒 {{ comment.created_at.strftime("%d %b %Y • %I:%M %p") if comment.created_at else "" }}
+
+{% if comment.author and comment.author.show_location and comment.author.last_city and comment.author.last_state %}
+    📍 {{ comment.author.last_city }}, {{ comment.author.last_state }}
+{% endif %}
+
+</small>
+
+
+
+<small class="badge bg-secondary ms-2">
+
+{% if comment.language == "en" %}
+🌐 English
+
+{% elif comment.language == "hi" %}
+🌐 Hindi
+
+{% elif comment.language == "pa" %}
+🌐 Punjabi
+
+{% elif comment.language == "fr" %}
+🌐 French
+
+{% elif comment.language == "de" %}
+🌐 German
+
+{% elif comment.language == "es" %}
+🌐 Spanish
+
+{% else %}
+🌐 {{ comment.language }}
+
+{% endif %}
+
+</small>
+
+</div>
+
+{% if comment.username == session["username"] %}
+
+<a href="/delete_comment/{{ comment.id }}"
+
+class="btn btn-outline-danger btn-sm">
+
+🗑 Delete
+
+</a>
+
+{% endif %}
+
+</div>
+
+<hr>
+
+<p class="mb-3 fs-5">
+    {{ comment.comment }}
+</p>
+
+{% if comment.translated_text %}
+<div class="alert alert-info mt-2">
+    🌍 <strong>Translated:</strong> {{ comment.translated_text }}
+</div>
+{% endif %}
+
+{% if comment.is_flagged %}
+<div class="mb-2">
+    <span class="badge bg-danger">
+        🚩 Reported
+    </span>
+</div>
+{% endif %}
+
+<div class="d-flex gap-2 mt-3">
+
+    <a href="{{ url_for('video.comment_like', comment_id=comment.id) }}"
+       class="btn btn-outline-success btn-sm">
+        👍 {{ comment.likes }}
+    </a>
+
+    <a href="{{ url_for('video.comment_dislike', comment_id=comment.id) }}"
+       class="btn btn-outline-danger btn-sm">
+        👎 {{ comment.dislikes }}
+    </a>
+
+    <a href="{{ url_for('video.comment_report', comment_id=comment.id) }}"
+       class="btn btn-outline-warning btn-sm">
+        🚩 Report
+    </a>
+
+    <form action="{{ url_for('video.translate_comment', comment_id=comment.id) }}"
+      method="GET"
+      class="d-inline">
+
+<select name="target_lang"
+        class="form-select form-select-sm d-inline"
+        style="width:140px;display:inline-block;">
+
+<option value="en">English</option>
+<option value="hi">Hindi</option>
+<option value="pa">Punjabi</option>
+<option value="fr">French</option>
+<option value="de">German</option>
+<option value="es">Spanish</option>
+<option value="ja">Japanese</option>
+
+</select>
+
+<button class="btn btn-outline-info btn-sm">
+🌍 Translate
+</button>
+
+</form>
+</div>
+
+</div>
+
+</div>
+
+{% else %}
+
+<div class="alert alert-info text-center shadow-sm p-4 rounded-4">
+
+<h5>
+
+💬 No comments yet
+
+</h5>
+
+<p class="mb-0">
+
+Be the first one to comment on this video.
+
+</p>
+
+</div>
+
+{% endfor %}
+
+<div class="text-center mt-5">
+
+<a href="/"
+
+class="btn btn-secondary btn-lg rounded-pill px-5">
+
+⬅ Back to Home
+
+</a>
+
+</div>
+
+</div>
+
+<footer class="bg-dark text-white mt-5">
+
+<div class="container py-5">
+
+<div class="row">
+
+<div class="col-md-4">
+
+<h4 class="fw-bold">
+
+🎥 YouTube Clone
+
+</h4>
+
+<p>
+
+A modern video streaming platform built using Flask, Bootstrap, MySQL and Razorpay.
+
+</p>
+
+</div>
+
+<div class="col-md-4">
+
+<h5>
+
+Quick Links
+
+</h5>
+
+<ul class="list-unstyled">
+
+<li class="mb-2">
+
+<a href="/" class="text-decoration-none text-light">
+
+🏠 Home
+
+</a>
+
+</li>
+
+<li class="mb-2">
+
+<a href="/upload" class="text-decoration-none text-light">
+
+📤 Upload
+
+</a>
+
+</li>
+
+<li class="mb-2">
+
+<a href="/subscription" class="text-decoration-none text-light">
+
+⭐ Subscription
+
+</a>
+
+</li>
+
+<li>
+
+<a href="{{ url_for('auth.profile') }}"
+
+class="text-decoration-none text-light">
+
+👤 Profile
+
+</a>
+
+</li>
+
+</ul>
+
+</div>
+
+<div class="col-md-4">
+
+<h5>
+
+Platform Features
+
+</h5>
+
+<p>✔ Premium Membership</p>
+
+<p>✔ Watch Party</p>
+
+<p>✔ Secure Downloads</p>
+
+<p>✔ Comments & Likes</p>
+
+<p>✔ Razorpay Payments</p>
+
+</div>
+
+</div>
+
+<hr class="border-secondary">
+
+<div class="text-center">
+
+<p class="mb-1">
+
+© 2026 YouTube Clone
+
+</p>
+
+<small class="text-secondary">
+
+Built with ❤️ using Flask • Bootstrap • MySQL • Razorpay
+
+</small>
+
+</div>
+
+</div>
+
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="{{ url_for('static', filename='js/player.js') }}"></script>
+
+</body>
+
+</html>

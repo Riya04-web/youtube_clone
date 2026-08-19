@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>My Profile</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='css/theme.css') }}">
+
+<style>
+
+.profile-header{
+
+    background: linear-gradient(135deg,#212529,#495057);
+    color:white;
+    border-radius:20px;
+    padding:40px;
+
+}
+
+.profile-img{
+
+    width:150px;
+    height:150px;
+    object-fit:cover;
+    border:5px solid white;
+
+}
+
+
+.plan-card{
+
+    border-radius:20px;
+    transition:0.3s;
+
+}
+
+
+.plan-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+
+.download-card{
+
+    border-radius:15px;
+
+}
+
+
+</style>
+
+
+</head>
+
+
+<body class="{{ 'dark-theme' if session.get('theme')=='dark' else 'light-theme' }}">
+
+
+<div class="container mt-5 mb-5">
+
+
+<!-- PROFILE HEADER -->
+
+
+<div class="profile-header shadow">
+
+
+<div class="text-center">
+
+
+<img
+
+src="{{ url_for('static',
+filename='profile_pics/' + user.profile_pic) }}"
+
+class="rounded-circle profile-img">
+
+
+<h2 class="mt-3">
+
+{{ user.username }}
+
+</h2>
+
+
+<p>
+
+{{ user.email }}
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+<br>
+
+
+
+<!-- SUBSCRIPTION CARD -->
+
+
+<div class="card shadow plan-card">
+
+
+<div class="card-body text-center">
+
+
+<h3>
+⭐ Subscription Plan
+</h3>
+
+
+<hr>
+
+
+{% if user.plan.lower()=="free" %}
+
+
+<h2>
+
+<span class="badge bg-secondary">
+
+Free
+
+</span>
+
+</h2>
+
+
+<p class="text-muted">
+
+Enjoy basic video access
+
+</p>
+
+
+<a href="{{url_for('auth.subscription')}}"
+
+class="btn btn-warning">
+
+Upgrade Plan
+
+</a>
+
+
+{% else %}
+
+
+<h2>
+
+
+{% if user.plan.lower()=="bronze" %}
+
+<span class="badge bg-warning text-dark">
+
+🥉 Bronze
+
+</span>
+
+
+{% elif user.plan.lower()=="silver" %}
+
+<span class="badge bg-primary">
+
+🥈 Silver
+
+</span>
+
+
+{% elif user.plan.lower()=="gold" %}
+
+<span class="badge bg-success">
+
+🥇 Gold
+
+</span>
+
+
+{% endif %}
+
+
+</h2>
+
+
+<div class="mt-4">
+
+
+<div class="alert alert-success">
+
+🎉 You are a <strong>{{user.plan}}</strong> member
+
+</div>
+
+
+
+<div class="row mt-3">
+
+
+<div class="col-md-6">
+
+
+<div class="card shadow-sm border-0">
+
+<div class="card-body text-center">
+
+
+<h5>
+🔐 Subscription Status
+</h5>
+
+
+<hr>
+
+
+<span class="badge bg-success">
+
+{{user.subscription_status}}
+
+</span>
+
+
+<p class="mt-3">
+
+<strong>Valid Until</strong>
+
+<br>
+
+{{user.subscription_end.strftime('%B %d, %Y')}}
+
+</p>
+
+
+</div>
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="col-md-6">
+
+
+<div class="card shadow-sm border-0">
+
+<div class="card-body text-center">
+
+
+<h5>
+🧾 Billing & Invoice
+</h5>
+
+
+<hr>
+
+
+<p class="text-muted">
+
+Your payment receipt is ready.
+
+</p>
+
+
+
+{% if user.invoice_file %}
+
+
+<a href="{{ url_for('subscription.download_invoice',
+filename=user.invoice_file) }}"
+
+class="btn btn-success px-4">
+
+
+⬇ Download Invoice PDF
+
+
+</a>
+
+
+{% else %}
+
+
+<p class="text-muted">
+
+Invoice not available
+
+</p>
+
+
+{% endif %}
+
+
+
+</div>
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+{% endif %}
+
+
+</div>
+
+
+</div>
+
+
+
+
+<br>
+
+
+
+<!-- ACCOUNT DETAILS -->
+
+
+<div class="card shadow">
+
+
+<div class="card-body">
+
+
+<h4>
+👤 Account Details
+</h4>
+
+
+<hr>
+
+
+<div class="row">
+
+
+<div class="col-md-6">
+
+<p>
+
+<strong>Username:</strong>
+
+{{user.username}}
+
+</p>
+
+
+</div>
+
+<br>
+
+<!-- THEME SETTINGS -->
+<!-- THEME SETTINGS -->
+
+<div class="card shadow theme-card mb-4">
+
+    <div class="card-body">
+
+        <h3 class="mb-4">
+            🎨 Theme Settings
+        </h3>
+
+        <form action="{{ url_for('auth.change_theme') }}" method="POST">
+
+            <div class="row align-items-end">
+
+                <div class="col-md-8">
+
+                    <label class="form-label fw-bold">
+                        Choose Your Theme
+                    </label>
+
+                    <select class="form-select theme-select" name="theme">
+
+                        <option value="light"
+                        {% if user.theme=="light" %}selected{% endif %}>
+                            🌞 Light Theme
+                        </option>
+
+                        <option value="dark"
+                        {% if user.theme=="dark" %}selected{% endif %}>
+                            🌙 Dark Theme
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <button class="btn btn-danger w-100">
+                        💾 Save Theme
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<div class="card-body">
+
+    <h3 class="mb-4">
+        📍 Location Privacy
+    </h3>
+
+    <form action="{{ url_for('auth.change_location_visibility') }}" method="POST">
+
+        <div class="form-check mb-3">
+
+            <input
+                class="form-check-input"
+                type="checkbox"
+                name="show_location"
+                id="show_location"
+                {% if user.show_location %}checked{% endif %}
+            >
+
+            <label class="form-check-label" for="show_location">
+                Show my city and state on my comments
+            </label>
+
+        </div>
+
+        <button class="btn btn-primary">
+            💾 Save Location Setting
+        </button>
+
+    </form>
+
+</div>
+
+<div class="col-md-6">
+
+<p>
+
+<strong>Email:</strong>
+
+{{user.email}}
+
+</p>
+
+
+</div>
+
+
+<div class="col-md-6">
+
+<p>
+
+<strong>Member Since:</strong>
+
+{{user.created_at.strftime('%B %d, %Y')}}
+
+</p>
+
+
+</div>
+
+
+<div class="col-md-6">
+
+<p>
+
+<strong>Payment ID:</strong>
+
+{{user.payment_id or "N/A"}}
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+</div>
+
+
+
+
+<br>
+
+
+
+<!-- DOWNLOAD HISTORY -->
+
+
+<div class="card shadow">
+
+
+<div class="card-body">
+
+
+<h4>
+
+⬇ Download History
+
+</h4>
+
+
+<hr>
+
+
+
+{% if downloads %}
+
+
+
+{% for download in downloads %}
+
+
+
+<div class="card download-card mb-3">
+
+
+<div class="card-body">
+
+
+<div class="d-flex justify-content-between align-items-center">
+
+
+<div>
+
+
+<h5>
+
+{{download.video.title}}
+
+</h5>
+
+
+<p class="text-muted">
+
+Downloaded:
+
+{{download.download_date}}
+
+</p>
+
+
+</div>
+
+
+<a href="/watch/{{download.video.id}}"
+
+class="btn btn-primary">
+
+Watch
+
+</a>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+{% endfor %}
+
+
+
+{% else %}
+
+
+<div class="alert alert-secondary">
+
+No downloads yet.
+
+</div>
+
+
+{% endif %}
+
+
+</div>
+
+
+</div>
+
+
+
+
+<br>
+
+
+
+<!-- ACTION BUTTONS -->
+
+
+<div class="text-center">
+
+
+<a href="{{url_for('auth.edit_profile')}}"
+
+class="btn btn-primary m-1">
+
+✏ Edit Profile
+
+</a>
+
+
+
+<a href="{{url_for('auth.change_password')}}"
+
+class="btn btn-warning m-1">
+
+🔒 Change Password
+
+</a>
+
+
+
+<a href="/"
+
+class="btn btn-dark m-1">
+
+🏠 Home
+
+</a>
+
+
+
+<a href="{{url_for('auth.logout')}}"
+
+class="btn btn-danger m-1">
+
+Logout
+
+</a>
+
+
+
+</div>
+
+
+
+</div>
+
+
+</body>
+
+
+</html>

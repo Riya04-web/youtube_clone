@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>YouTube Clone</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+    --bg-primary:#181818;
+    --bg-card:#1f1f1f;
+    --bg-card-alt:#1b1b1b;
+    --text-primary:#ffffff;
+    --text-secondary:#c9c9c9;
+    --text-muted:#9a9a9a;
+    --accent-red:#ff0000;
+    --accent-red-dark:#b30000;
+    --border-subtle:#2b2b2b;
+}
+ 
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+ 
+body{
+    background:var(--bg-primary) !important;
+    color:var(--text-primary) !important;
+}
+ 
+/* Keep headings readable regardless of Bootstrap's light/dark theme class on body */
+h1,h2,h3,h4,h5,h6{
+    color:inherit;
+}
+ 
+/* ================= NAVBAR ================= */
+ 
+.navbar{
+    background:#0f0f0f !important;
+    position:sticky;
+    top:0;
+    z-index:999;
+    padding:14px 40px;
+    box-shadow:0 4px 20px rgba(0,0,0,.45);
+    border-bottom:1px solid #242424;
+}
+ 
+.navbar-brand{
+    font-size:30px;
+    font-weight:700;
+    color:white !important;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    letter-spacing:.2px;
+}
+ 
+.search-box{
+    width:340px;
+    background:#222;
+    color:white;
+    border:1px solid #333;
+    border-radius:30px;
+    padding:11px 20px;
+    font-size:15px;
+    transition:.25s;
+}
+ 
+.search-box::placeholder{
+    color:#8f8f8f;
+}
+ 
+.search-box:focus{
+    outline:none;
+    background:#2b2b2b;
+    box-shadow:0 0 0 2px rgba(255,0,0,.35);
+    color:white;
+    border-color:var(--accent-red);
+}
+ 
+.navbar .btn{
+    border-radius:30px;
+    padding:10px 24px;
+    font-weight:600;
+    font-size:14.5px;
+}
+ 
+/* ================= HERO ================= */
+ 
+.hero{
+ 
+    background:linear-gradient(135deg,#ff0000,#8a0000);
+ 
+    color:white;
+ 
+    text-align:center;
+ 
+    padding:70px 20px;
+ 
+    border-radius:0 0 32px 32px;
+ 
+    margin-bottom:45px;
+ 
+    box-shadow:0 15px 35px rgba(255,0,0,.22);
+ 
+    position:relative;
+ 
+    overflow:hidden;
+}
+ 
+.hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:radial-gradient(circle at 25% 15%,rgba(255,255,255,.14),transparent 55%);
+    pointer-events:none;
+}
+ 
+.hero h1{
+ 
+    font-size:56px;
+ 
+    font-weight:700;
+ 
+    margin-bottom:14px;
+ 
+    letter-spacing:-.5px;
+ 
+    position:relative;
+}
+ 
+.hero p{
+ 
+    font-size:19px;
+ 
+    opacity:.92;
+ 
+    position:relative;
+}
+ 
+@media (max-width:768px){
+    .hero h1{ font-size:36px; }
+    .hero p{ font-size:16px; }
+}
+ 
+/* ================= WELCOME CARD ================= */
+ 
+.welcome-card{
+ 
+    background:var(--bg-card);
+ 
+    border:1px solid var(--border-subtle);
+ 
+    border-radius:20px;
+ 
+    padding:32px;
+ 
+    box-shadow:0 12px 32px rgba(0,0,0,.3);
+ 
+    margin-bottom:36px;
+}
+ 
+.welcome-card h2{
+ 
+    font-size:34px;
+ 
+    font-weight:700;
+ 
+    color:white;
+}
+ 
+.welcome-card h2 span{
+ 
+    color:#ff3040;
+}
+ 
+.welcome-card p{
+ 
+    color:var(--text-secondary) !important;
+ 
+    font-size:16px;
+ 
+    margin-top:14px;
+ 
+    line-height:1.7;
+}
+ 
+/* ================= STATS ================= */
+ 
+.stats-card{
+ 
+    background:var(--bg-card);
+ 
+    border:1px solid var(--border-subtle);
+ 
+    border-radius:20px;
+ 
+    padding:32px;
+ 
+    text-align:center;
+ 
+    color:white;
+ 
+    transition:.3s ease;
+ 
+    cursor:pointer;
+ 
+    box-shadow:0 10px 26px rgba(0,0,0,.28);
+ 
+    height:100%;
+}
+ 
+.stats-card:hover{
+ 
+    transform:translateY(-8px);
+ 
+    border-color:#3a3a3a;
+ 
+    box-shadow:0 18px 40px rgba(255,0,0,.18);
+}
+ 
+.stats-card .display-5{
+ 
+    font-size:44px;
+ 
+    margin-bottom:12px;
+ 
+    line-height:1;
+}
+ 
+.stats-card h3{
+ 
+    font-size:22px;
+ 
+    font-weight:700;
+ 
+    margin-bottom:10px;
+ 
+    color:white !important;
+}
+ 
+.stats-card p{
+ 
+    color:var(--text-secondary) !important;
+ 
+    font-size:14.5px;
+ 
+    margin:0;
+}
+ 
+/* ================= SECTION TITLE ================= */
+ 
+.section-title, h2.fw-bold{
+ 
+    font-size:30px;
+ 
+    font-weight:700;
+ 
+    color:white;
+ 
+    margin:50px 0 26px;
+ 
+    display:flex;
+ 
+    align-items:center;
+ 
+    gap:10px;
+}
+ 
+/* ================= VIDEO CARD ================= */
+ 
+.video-card{
+ 
+    background:var(--bg-card-alt);
+ 
+    border:1px solid var(--border-subtle);
+ 
+    border-radius:18px;
+ 
+    overflow:hidden;
+ 
+    transition:.3s ease;
+ 
+    height:100%;
+ 
+    box-shadow:0 10px 26px rgba(0,0,0,.3);
+}
+ 
+.video-card:hover{
+ 
+    transform:translateY(-8px);
+ 
+    border-color:#3a3a3a;
+ 
+    box-shadow:0 18px 40px rgba(255,0,0,.16);
+}
+ 
+.thumbnail{
+ 
+    width:100%;
+ 
+    height:210px;
+ 
+    object-fit:cover;
+ 
+    background:#0f0f0f;
+ 
+    transition:.4s;
+}
+ 
+.video-card:hover .thumbnail{
+ 
+    transform:scale(1.05);
+}
+ 
+.badge-plan{
+ 
+    position:absolute;
+ 
+    top:14px;
+ 
+    right:14px;
+ 
+    border-radius:24px;
+ 
+    padding:6px 14px;
+ 
+    font-size:12.5px;
+ 
+    font-weight:700;
+ 
+    letter-spacing:.3px;
+ 
+    box-shadow:0 4px 10px rgba(0,0,0,.35);
+ 
+    z-index:2;
+}
+ 
+.video-title{
+ 
+    font-size:21px;
+ 
+    font-weight:700;
+ 
+    color:white;
+ 
+    line-height:1.3;
+}
+ 
+.video-desc{
+ 
+    color:var(--text-secondary) !important;
+ 
+    line-height:1.6;
+ 
+    font-size:14.5px;
+ 
+    min-height:55px;
+}
+ 
+.video-card p, .video-card small{
+ 
+    color:var(--text-secondary) !important;
+}
+ 
+.video-card hr{
+ 
+    border-color:var(--border-subtle);
+ 
+    margin:14px 0;
+}
+ 
+.video-card .d-flex.justify-content-between span{
+ 
+    background:#262626;
+ 
+    padding:5px 12px;
+ 
+    border-radius:20px;
+ 
+    font-size:13.5px;
+ 
+    color:#e6e6e6 !important;
+}
+ 
+.watch-btn{
+ 
+    width:100%;
+ 
+    background:var(--accent-red);
+ 
+    color:white;
+ 
+    border:none;
+ 
+    border-radius:12px;
+ 
+    padding:12px;
+ 
+    font-size:15.5px;
+ 
+    font-weight:600;
+ 
+    transition:.25s;
+}
+ 
+.watch-btn:hover{
+ 
+    background:#d60000;
+ 
+    transform:scale(1.02);
+}
+ 
+/* ================= FOOTER ================= */
+ 
+footer{
+ 
+    margin-top:70px;
+ 
+    background:#111;
+ 
+    color:white;
+ 
+    padding:45px 0;
+ 
+    border-top:1px solid #242424;
+}
+ 
+footer h4, footer h5{
+ 
+    color:white;
+}
+ 
+footer p, footer .text-light{
+ 
+    color:var(--text-secondary) !important;
+}
+ 
+.footer-link, footer a{
+ 
+    color:#d9d9d9;
+ 
+    text-decoration:none;
+ 
+    transition:.25s;
+}
+ 
+.footer-link:hover, footer a:hover{
+ 
+    color:#ff3b3b;
+}
+ 
+footer hr{
+ 
+    border-color:#242424;
+}
+ 
+footer small.text-secondary{
+ 
+    color:#8a8a8a !important;
+}
+ 
+/* ================= SCROLLBAR ================= */
+ 
+::-webkit-scrollbar{
+ 
+    width:8px;
+}
+ 
+::-webkit-scrollbar-track{
+ 
+    background:#111;
+}
+ 
+::-webkit-scrollbar-thumb{
+ 
+    background:#444;
+ 
+    border-radius:20px;
+}
+ 
+::-webkit-scrollbar-thumb:hover{
+ 
+    background:#ff0000;
+}
+</style>
+
+</head>
+
+<body class="{% if session.get('theme') == 'dark' %}bg-dark text-white{% else %}bg-light text-dark{% endif %}"></body>
+
+    <!-- ================= NAVBAR ================= -->
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+
+<div class="container">
+
+<a class="navbar-brand" href="/">
+
+🎥 YouTube Clone
+
+</a>
+
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
+
+<span class="navbar-toggler-icon"></span>
+
+</button>
+
+<div class="collapse navbar-collapse" id="navbar">
+
+<form class="d-flex mx-auto" method="GET" action="/" style="width:55%;">
+
+<input
+class="form-control search-box me-2"
+type="search"
+name="search"
+placeholder="🔍 Search videos...">
+
+<button class="btn btn-light rounded-pill px-4">
+
+Search
+
+</button>
+
+</form>
+
+<div class="d-flex align-items-center">
+
+<a
+href="/upload"
+class="btn btn-light rounded-pill me-3">
+
+⬆ Upload
+
+</a>
+
+<a href="{{ url_for('auth.profile') }}">
+
+<img
+
+src="{{ url_for('static', filename='profile_pics/' + session.get('profile_pic','default.png')) }}"
+
+width="48"
+
+height="48"
+
+class="rounded-circle border border-3 border-white"
+
+style="object-fit:cover;">
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</nav>
+
+<!-- ================= HERO SECTION ================= -->
+
+<div class="hero">
+
+<div class="container">
+
+<h1>
+
+Watch Without Limits
+
+</h1>
+
+<p>
+
+Discover videos from creators around the world.
+
+</p>
+
+
+</div>
+
+</div>
+
+<div class="container">
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+
+{% if messages %}
+
+{% for category,message in messages %}
+
+<div class="alert alert-{{category}} alert-dismissible fade show">
+
+{{ message }}
+
+<button
+type="button"
+class="btn-close"
+data-bs-dismiss="alert">
+
+</button>
+
+</div>
+
+{% endfor %}
+
+{% endif %}
+
+{% endwith %}
+
+<!-- ================= WELCOME CARD ================= -->
+
+<div class="card welcome-card">
+
+<div class="card-body">
+
+<h2>
+
+Welcome,
+
+<span class="text-danger">
+
+{{ username }}
+
+</span>
+
+👋
+
+</h2>
+
+<p class="text-muted mb-0">
+
+Discover amazing videos uploaded by creators from around the world.
+
+Watch free videos, enjoy premium content, and connect with the community.
+
+</p>
+
+</div>
+
+</div>
+
+<!-- ================= DASHBOARD STATS ================= -->
+
+<div class="row mb-5">
+
+<div class="col-lg-4 col-md-6 mb-4">
+
+<div class="card stats-card">
+
+<div class="card-body text-center">
+
+<h1 class="display-5">
+
+🎬
+
+</h1>
+
+<h3 class="fw-bold">
+
+{{ videos|length }}
+
+</h3>
+
+<p class="text-muted mb-0">
+
+Total Videos
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-lg-4 col-md-6 mb-4">
+
+<div class="card stats-card">
+
+<div class="card-body text-center">
+
+<h1 class="display-5 text-warning">
+
+⭐
+
+</h1>
+
+<h3 class="fw-bold">
+
+Premium Content
+
+</h3>
+
+<p class="text-muted mb-0">
+
+Exclusive videos for subscribers
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-lg-4 col-md-12 mb-4">
+
+<div class="card stats-card">
+
+<div class="card-body text-center">
+
+<h1 class="display-5 text-success">
+
+👥
+
+</h1>
+
+<h3 class="fw-bold">
+
+Community
+
+</h3>
+
+<p class="text-muted mb-0">
+
+Watch • Like • Comment • Share
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= VIDEO SECTION ================= -->
+
+<h2 class="fw-bold mb-4">
+
+🔥 Latest Videos
+
+</h2>
+
+<div class="row">
+
+{% for video in videos %}
+
+<div class="col-lg-4 col-md-6 mb-4">
+
+<div class="card video-card">
+
+<div class="position-relative">
+
+<img
+src="/static/uploads/{{ video.thumbnail }}"
+class="card-img-top thumbnail">
+
+{% if video.is_premium %}
+
+<span class="badge bg-warning text-dark badge-plan">
+
+🔒 PREMIUM
+
+</span>
+
+{% else %}
+
+<span class="badge bg-success badge-plan">
+
+FREE
+
+</span>
+
+{% endif %}
+
+</div>
+
+<div class="card-body d-flex flex-column">
+
+{% if video.views >= 50 %}
+
+<span class="badge bg-danger mb-2" style="width:fit-content;">
+
+🔥 Trending
+
+</span>
+
+{% endif %}
+
+<h5 class="video-title">
+
+{{ video.title }}
+
+</h5>
+
+<p class="mb-2">
+
+👤 <strong>{{ video.user.username }}</strong>
+
+</p>
+
+<small class="text-muted mb-3">
+
+📅 {{ video.created_at.strftime("%d %b %Y") }}
+
+</small>
+
+<p class="video-desc">
+
+{{ video.description }}
+
+</p>
+
+<hr>
+
+<div class="d-flex justify-content-between mb-3">
+
+<span>
+
+👁 {{ video.views }}
+
+</span>
+
+<span>
+
+👍 {{ video.likes }}
+
+</span>
+
+<span>
+
+👎 {{ video.dislikes }}
+
+</span>
+
+</div>
+
+<a
+href="/watch/{{ video.id }}"
+class="btn btn-danger watch-btn mt-auto">
+
+▶ Watch Now
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+{% else %}
+
+<div class="col-12">
+
+<div class="alert alert-warning text-center shadow p-5">
+
+<h3>
+
+😕 No Videos Found
+
+</h3>
+
+<p class="mb-0">
+
+Try searching for another video or upload your first one.
+
+</p>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<!-- ================= FOOTER ================= -->
+
+<footer class="bg-dark text-white mt-5">
+
+<div class="container py-5">
+
+<div class="row">
+
+<!-- About -->
+
+<div class="col-lg-4 mb-4">
+
+<h4 class="fw-bold">
+
+🎥 YouTube Clone
+
+</h4>
+
+<p class="text-light">
+
+A modern video streaming platform built using
+Flask, MySQL, Bootstrap and Razorpay.
+
+Watch videos, upload content, subscribe to premium plans,
+and enjoy a secure streaming experience.
+
+</p>
+
+</div>
+
+<!-- Quick Links -->
+
+<div class="col-lg-4 mb-4">
+
+<h5 class="fw-bold">
+
+Quick Links
+
+</h5>
+
+<ul class="list-unstyled">
+
+<li class="mb-2">
+
+<a href="/" class="text-decoration-none text-light">
+
+🏠 Home
+
+</a>
+
+</li>
+
+<li class="mb-2">
+
+<a href="/upload" class="text-decoration-none text-light">
+
+📤 Upload Video
+
+</a>
+
+</li>
+
+<li class="mb-2">
+
+<a href="/subscription" class="text-decoration-none text-light">
+
+⭐ Subscription
+
+</a>
+
+</li>
+
+<li class="mb-2">
+
+<a href="{{ url_for('auth.profile') }}" class="text-decoration-none text-light">
+
+👤 My Profile
+
+</a>
+
+</li>
+
+</ul>
+
+</div>
+
+<!-- Features -->
+
+<div class="col-lg-4 mb-4">
+
+<h5 class="fw-bold">
+
+Platform Features
+
+</h5>
+
+<p>✔ HD Video Streaming</p>
+
+<p>✔ Premium Membership</p>
+
+<p>✔ Secure Downloads</p>
+
+<p>✔ Watch Party</p>
+
+<p>✔ Comments & Likes</p>
+
+<p>✔ Razorpay Payments</p>
+
+</div>
+
+</div>
+
+<hr class="border-secondary">
+
+<div class="text-center">
+
+<p class="mb-1">
+
+© 2026 <strong>YouTube Clone</strong>. All Rights Reserved.
+
+</p>
+
+<small class="text-secondary">
+
+Built with ❤️ using Flask • Bootstrap • MySQL • Razorpay
+
+</small>
+
+</div>
+
+</div>
+
+</footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
