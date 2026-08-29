@@ -8,15 +8,26 @@ class Config:
         "development-secret-key"
     )
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL",
-        "mysql+pymysql://root:@localhost/youtube_clone"
-    )
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+
+    if DATABASE_URL:
+        SQLALCHEMY_DATABASE_URI = DATABASE_URL
+
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            "connect_args": {
+                "ssl": {}
+            }
+        }
+    else:
+        SQLALCHEMY_DATABASE_URI = (
+            "mysql+pymysql://root:@localhost/youtube_clone"
+        )
+
+        SQLALCHEMY_ENGINE_OPTIONS = {}
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Razorpay
-    # Keep these as environment variables for deployment.
     RAZORPAY_KEY_ID = os.environ.get(
         "RAZORPAY_KEY_ID"
     )
