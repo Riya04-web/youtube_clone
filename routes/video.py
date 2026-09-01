@@ -20,9 +20,16 @@ from models.user import User
 from models.download import Download
 from models.comment_reaction import CommentReaction
 from models.video_reaction import VideoReaction
+from config import Config
 
 import os
+import cloudinary
+import cloudinary.uploader
 from datetime import datetime
+
+cloudinary.config(
+    cloudinary_url=os.environ.get("CLOUDINARY_URL")
+)
 
 video = Blueprint("video", __name__)
 
@@ -464,31 +471,45 @@ def upload_page():
 
         thumbnail_file = request.files["thumbnail"]
 
-        video_filename = secure_filename(video_file.filename)
+        # ---------------------------
+        # Upload video to Cloudinary
+        # ---------------------------
 
-        thumbnail_filename = secure_filename(thumbnail_file.filename)
+        video_result = cloudinary.uploader.upload_large(
+    video_file.stream,
+    resource_type="video",
+    chunk_size=6 * 1024 * 1024
+)
 
-        video_file.save(
-            os.path.join(
-                UPLOAD_FOLDER,
-                video_filename
-            )
-        )
+        video_url = video_result["secure_url"]
 
-        thumbnail_file.save(
-            os.path.join(
-                UPLOAD_FOLDER,
-                thumbnail_filename
-            )
-        )
+        # ---------------------------
+        # Upload thumbnail to Cloudinary
+        # ---------------------------
+
+        thumbnail_result = cloudinary.uploader.upload(
+    thumbnail_file.stream,
+    resource_type="image",
+    folder="youtube_clone/thumbnails"
+)
+
+        thumbnail_url = thumbnail_result["secure_url"]
+
+        # ---------------------------
+        # Premium flag
+        # ---------------------------
 
         premium = True if request.form.get("premium") else False
+
+        # ---------------------------
+        # Save database record
+        # ---------------------------
 
         new_video = Video(
             title=title,
             description=description,
-            filename=video_filename,
-            thumbnail=thumbnail_filename,
+            filename=video_url,
+            thumbnail=thumbnail_url,
             is_premium=premium,
             uploaded_by=session["user_id"]
         )
@@ -505,6 +526,8 @@ def upload_page():
         return redirect(url_for("home"))
 
     return render_template("upload.html")
+
+
 
 
 # ===========================

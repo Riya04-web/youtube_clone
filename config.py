@@ -72,3 +72,19 @@ class Config:
     MAIL_DEFAULT_SENDER = os.environ.get(
         "MAIL_USERNAME"
     )
+    
+        # ================= CLOUDINARY =================
+
+    CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL")
+
+    CLOUDINARY_CLOUD_NAME = os.environ.get(
+        "CLOUDINARY_CLOUD_NAME"
+    )
+
+    CLOUDINARY_API_KEY = os.environ.get(
+        "CLOUDINARY_API_KEY"
+    )
+
+    CLOUDINARY_API_SECRET = os.environ.get(
+        "CLOUDINARY_API_SECRET"
+    )

@@ -260,7 +260,7 @@ FREE
     <div class="custom-player" id="playerContainer">
 
     <video id="videoPlayer" class="main-video">
-        <source src="/static/uploads/{{ video.filename }}" type="video/mp4">
+    <source src="{{ video.filename }}" type="video/mp4">
     </video>
 
     <!-- Loading Spinner -->
@@ -372,12 +372,12 @@ FREE
         <div class="row align-items-center">
 
             <div class="col-md-4">
-                <img
-                    src="/static/uploads/{{ next_video.thumbnail }}"
-                    class="img-fluid rounded"
-                    style="height:120px;width:100%;object-fit:cover;"
-                >
-            </div>
+    <img
+        src="{{ next_video.thumbnail }}"
+        class="img-fluid rounded"
+        style="height:120px;width:100%;object-fit:cover;"
+    >
+</div>
 
             <div class="col-md-8">
 
