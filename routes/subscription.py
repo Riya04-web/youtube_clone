@@ -8,6 +8,7 @@ from flask import jsonify, request
 from flask_mail import Message
 from extensions import mail
 import os
+import io
 from reportlab.pdfgen import canvas
 
 
@@ -48,28 +49,14 @@ plans = {
 
 def generate_invoice(user, plan, payment_id):
 
-    folder = "static/invoices"
+    # Create PDF in memory instead of saving to Vercel filesystem
+    pdf_buffer = io.BytesIO()
 
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-
-
-    filename = f"invoice_{payment_id}.pdf"
-
-    filepath = os.path.join(
-        folder,
-        filename
-    )
-
-
-    pdf = canvas.Canvas(filepath)
-
+    pdf = canvas.Canvas(pdf_buffer)
 
     width, height = pdf._pagesize
 
-
     # ---------------- HEADER ----------------
-
 
     pdf.setFont(
         "Helvetica-Bold",
@@ -78,10 +65,9 @@ def generate_invoice(user, plan, payment_id):
 
     pdf.drawString(
         60,
-        height-70,
+        height - 70,
         "YouTube Clone"
     )
-
 
     pdf.setFont(
         "Helvetica",
@@ -90,44 +76,36 @@ def generate_invoice(user, plan, payment_id):
 
     pdf.drawString(
         60,
-        height-95,
+        height - 95,
         "Premium Subscription Invoice"
     )
-
 
     # Invoice number
 
     pdf.drawRightString(
         540,
-        height-70,
+        height - 70,
         "INVOICE"
     )
 
-
     pdf.drawRightString(
         540,
-        height-90,
+        height - 90,
         payment_id
     )
-
-
 
     # Line
 
     pdf.line(
         60,
-        height-120,
+        height - 120,
         540,
-        height-120
+        height - 120
     )
-
-
 
     # ---------------- CUSTOMER DETAILS ----------------
 
-
     y = height - 170
-
 
     pdf.setFont(
         "Helvetica-Bold",
@@ -140,46 +118,37 @@ def generate_invoice(user, plan, payment_id):
         "Customer Details"
     )
 
-
     pdf.setFont(
         "Helvetica",
         11
     )
 
-
     pdf.drawString(
         60,
-        y-30,
+        y - 30,
         f"Name: {user.username}"
     )
 
-
     pdf.drawString(
         60,
-        y-50,
+        y - 50,
         f"Email: {user.email}"
     )
 
-
-
     # ---------------- PLAN DETAILS ----------------
 
-
     y = y - 130
-
 
     pdf.setFont(
         "Helvetica-Bold",
         14
     )
 
-
     pdf.drawString(
         60,
         y,
         "Subscription Details"
     )
-
 
     # Table Header
 
@@ -188,77 +157,62 @@ def generate_invoice(user, plan, payment_id):
         11
     )
 
-
     pdf.drawString(
         70,
-        y-40,
+        y - 40,
         "Plan"
     )
 
-
     pdf.drawString(
         230,
-        y-40,
+        y - 40,
         "Duration"
     )
 
-
     pdf.drawString(
         380,
-        y-40,
+        y - 40,
         "Amount"
     )
 
-
-
     pdf.line(
         60,
-        y-50,
+        y - 50,
         540,
-        y-50
+        y - 50
     )
-
-
 
     pdf.setFont(
         "Helvetica",
         11
     )
 
-
     pdf.drawString(
         70,
-        y-80,
+        y - 80,
         plan
     )
 
-
     pdf.drawString(
         230,
-        y-80,
+        y - 80,
         "30 Days"
     )
 
-
     pdf.drawString(
         380,
-        y-80,
+        y - 80,
         f"Rs. {plans[plan]}"
     )
 
-
-
     # ---------------- PAYMENT DETAILS ----------------
 
-
     y = y - 160
-
 
     pdf.setFont(
         "Helvetica-Bold",
         14
     )
-
 
     pdf.drawString(
         60,
@@ -266,37 +220,30 @@ def generate_invoice(user, plan, payment_id):
         "Payment Information"
     )
 
-
     pdf.setFont(
         "Helvetica",
         11
     )
 
-
     pdf.drawString(
         60,
-        y-30,
+        y - 30,
         f"Payment ID: {payment_id}"
     )
 
-
     pdf.drawString(
         60,
-        y-50,
+        y - 50,
         "Payment Status: Successful"
     )
 
-
     pdf.drawString(
         60,
-        y-70,
+        y - 70,
         f"Valid Until: {user.subscription_end.strftime('%d-%m-%Y')}"
     )
 
-
-
     # ---------------- FOOTER ----------------
-
 
     pdf.line(
         60,
@@ -305,19 +252,16 @@ def generate_invoice(user, plan, payment_id):
         120
     )
 
-
     pdf.setFont(
         "Helvetica-Oblique",
         10
     )
 
-
     pdf.drawCentredString(
         300,
         90,
-        "Thank you for choosing YouTube Clone Premium 🚀"
+        "Thank you for choosing YouTube Clone Premium"
     )
-
 
     pdf.drawCentredString(
         300,
@@ -325,11 +269,36 @@ def generate_invoice(user, plan, payment_id):
         "This is a computer generated invoice."
     )
 
-
     pdf.save()
 
+    # Move pointer back to beginning
+    pdf_buffer.seek(0)
 
-    return filename
+    return pdf_buffer
+
+@subscription.route("/reset_subscription")
+def reset_subscription():
+
+    if "user_id" not in session:
+        return "Please login first"
+
+    user = User.query.get(session["user_id"])
+
+    if not user:
+        return "User not found"
+
+    user.plan = "Free"
+    user.subscription_status = "Inactive"
+    user.subscription_start = None
+    user.subscription_end = None
+    user.payment_id = None
+    user.invoice_file = None
+
+    session["plan"] = "Free"
+
+    db.session.commit()
+
+    return "Subscription reset successfully. You can now test Razorpay again."
 
 @subscription.route("/subscription")
 def subscription_page():
@@ -447,23 +416,12 @@ def payment_success():
 
 
 
-    # Generate invoice
-
+    # Generate invoice in memory
     invoice_file = generate_invoice(
-
         user,
-
         plan,
-
         payment_id
-
     )
-
-
-    user.invoice_file = invoice_file
-
-
-    db.session.commit()
 
 
 
@@ -500,9 +458,19 @@ Thank you for using YouTube Clone 🚀
 
 
     try:
+
+        msg.attach(
+            f"invoice_{payment_id}.pdf",
+            "application/pdf",
+            invoice_file.getvalue()
+    )
+
         mail.send(msg)
+
         print("✅ Email sent successfully")
+
     except Exception as e:
+
         print("❌ Email sending failed:", e)
 
     return jsonify({

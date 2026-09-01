@@ -8,17 +8,29 @@ class Config:
         "development-secret-key"
     )
 
+    # ================= DATABASE =================
+
     DATABASE_URL = os.environ.get("DATABASE_URL")
 
     if DATABASE_URL:
+
+        # Make sure mysql:// uses PyMySQL
+        if DATABASE_URL.startswith("mysql://"):
+            DATABASE_URL = DATABASE_URL.replace(
+                "mysql://",
+                "mysql+pymysql://",
+                1
+            )
+
+        # Remove query parameters such as ssl-mode
+        DATABASE_URL = DATABASE_URL.split("?")[0]
+
         SQLALCHEMY_DATABASE_URI = DATABASE_URL
 
-        SQLALCHEMY_ENGINE_OPTIONS = {
-            "connect_args": {
-                "ssl": {}
-            }
-        }
+        SQLALCHEMY_ENGINE_OPTIONS = {}
+
     else:
+
         SQLALCHEMY_DATABASE_URI = (
             "mysql+pymysql://root:@localhost/youtube_clone"
         )
@@ -27,7 +39,9 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Razorpay
+
+    # ================= RAZORPAY =================
+
     RAZORPAY_KEY_ID = os.environ.get(
         "RAZORPAY_KEY_ID"
     )
@@ -36,10 +50,15 @@ class Config:
         "RAZORPAY_KEY_SECRET"
     )
 
-    # Gmail / Flask-Mail
+
+    # ================= GMAIL =================
+
     MAIL_SERVER = "smtp.gmail.com"
+
     MAIL_PORT = 587
+
     MAIL_USE_TLS = True
+
     MAIL_USE_SSL = False
 
     MAIL_USERNAME = os.environ.get(
