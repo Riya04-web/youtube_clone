@@ -1,4 +1,5 @@
 import re
+import time
 from deep_translator import GoogleTranslator
 from langdetect import detect
 from flask import (
@@ -32,6 +33,28 @@ cloudinary.config(
 )
 
 video = Blueprint("video", __name__)
+
+@video.route("/cloudinary_signature")
+def cloudinary_signature():
+
+    if "user_id" not in session:
+        return {"error": "Unauthorized"}, 401
+
+    timestamp = int(time.time())
+
+    signature = cloudinary.utils.api_sign_request(
+        {
+            "timestamp": timestamp
+        },
+        cloudinary.config().api_secret
+    )
+
+    return {
+        "signature": signature,
+        "timestamp": timestamp,
+        "api_key": cloudinary.config().api_key,
+        "cloud_name": cloudinary.config().cloud_name
+    }
 
 UPLOAD_FOLDER = "static/uploads"
 BAD_WORDS = [
@@ -454,6 +477,9 @@ def comment_report(comment_id):
 # ===========================
 # UPLOAD VIDEO
 # ===========================
+# ===========================
+# UPLOAD VIDEO
+# ===========================
 
 @video.route("/upload", methods=["GET", "POST"])
 def upload_page():
@@ -463,48 +489,27 @@ def upload_page():
 
     if request.method == "POST":
 
-        title = request.form["title"]
+        title = request.form.get("title")
+        description = request.form.get("description")
 
-        description = request.form["description"]
-
-        video_file = request.files["video"]
-
-        thumbnail_file = request.files["thumbnail"]
-
-        # ---------------------------
-        # Upload video to Cloudinary
-        # ---------------------------
-
-        video_result = cloudinary.uploader.upload_large(
-    video_file.stream,
-    resource_type="video",
-    chunk_size=6 * 1024 * 1024
-)
-
-        video_url = video_result["secure_url"]
-
-        # ---------------------------
-        # Upload thumbnail to Cloudinary
-        # ---------------------------
-
-        thumbnail_result = cloudinary.uploader.upload(
-    thumbnail_file.stream,
-    resource_type="image",
-    folder="youtube_clone/thumbnails"
-)
-
-        thumbnail_url = thumbnail_result["secure_url"]
-
-        # ---------------------------
-        # Premium flag
-        # ---------------------------
+        video_url = request.form.get("video_url")
+        thumbnail_url = request.form.get("thumbnail_url")
 
         premium = True if request.form.get("premium") else False
 
-        # ---------------------------
-        # Save database record
-        # ---------------------------
+        # Make sure Cloudinary URLs were received
+        if not video_url or not thumbnail_url:
 
+            flash(
+                "Video and thumbnail upload failed.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("video.upload_page")
+            )
+
+        # Save database record
         new_video = Video(
             title=title,
             description=description,
@@ -515,7 +520,6 @@ def upload_page():
         )
 
         db.session.add(new_video)
-
         db.session.commit()
 
         flash(
@@ -526,8 +530,6 @@ def upload_page():
         return redirect(url_for("home"))
 
     return render_template("upload.html")
-
-
 
 
 # ===========================
