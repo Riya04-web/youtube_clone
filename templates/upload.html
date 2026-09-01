@@ -103,11 +103,20 @@
                             </label>
 
                             <input
-                                type="file"
-                                id="videoFile"
-                                class="form-control"
-                                accept="video/*"
-                                required>
+    type="file"
+    id="videoFile"
+    class="form-control"
+    accept="video/*"
+    required>
+
+<div class="form-text">
+    📌 Maximum video size: <strong>100 MB</strong>
+</div>
+
+<div
+    id="videoSizeError"
+    class="alert alert-warning mt-2 d-none">
+</div>
 
                         </div>
 
@@ -219,28 +228,68 @@
 const form = document.getElementById("uploadForm");
 
 const videoFile = document.getElementById("videoFile");
+const videoSizeError =
+    document.getElementById("videoSizeError");
 
+const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB
+
+
+videoFile.addEventListener("change", function() {
+
+    const video = videoFile.files[0];
+
+    if (video && video.size > MAX_VIDEO_SIZE) {
+
+    showStatus(
+        "⚠️ Please select a video of 100 MB or less.",
+        "warning"
+    );
+
+    return;
+}
+
+    if (!video) {
+        videoSizeError.classList.add("d-none");
+        return;
+    }
+
+    if (video.size > MAX_VIDEO_SIZE) {
+
+        const sizeMB =
+            (video.size / (1024 * 1024)).toFixed(1);
+
+        videoSizeError.textContent =
+            `⚠️ This video is ${sizeMB} MB. ` +
+            `Please select a video of 100 MB or less.`;
+
+        videoSizeError.classList.remove("d-none");
+
+        videoFile.value = "";
+
+    }
+    else {
+
+        videoSizeError.classList.add("d-none");
+
+    }
+
+});
 const thumbnailFile = document.getElementById("thumbnailFile");
 
 const videoUrl = document.getElementById("videoUrl");
-
 const thumbnailUrl = document.getElementById("thumbnailUrl");
 
 const uploadButton = document.getElementById("uploadButton");
-
 const uploadStatus = document.getElementById("uploadStatus");
 
 const progressContainer = document.getElementById("progressContainer");
-
 const progressBar = document.getElementById("progressBar");
 
 
 function showStatus(message, type = "info") {
 
     uploadStatus.className = "alert alert-" + type;
-
     uploadStatus.textContent = message;
-
     uploadStatus.classList.remove("d-none");
 
 }
@@ -251,15 +300,18 @@ async function getSignature() {
     const response = await fetch("/cloudinary_signature");
 
     if (!response.ok) {
-
         throw new Error("Could not get Cloudinary signature.");
-
     }
 
     return await response.json();
 
 }
 
+
+/* =========================================================
+   NORMAL CLOUDINARY UPLOAD
+   Used for thumbnail
+========================================================= */
 
 function uploadToCloudinary(file, signatureData, resourceType) {
 
@@ -270,9 +322,7 @@ function uploadToCloudinary(file, signatureData, resourceType) {
         const uploadUrl =
             `https://api.cloudinary.com/v1_1/${signatureData.cloud_name}/${resourceType}/upload`;
 
-
         xhr.open("POST", uploadUrl);
-
 
         xhr.upload.addEventListener("progress", function(event) {
 
@@ -282,21 +332,33 @@ function uploadToCloudinary(file, signatureData, resourceType) {
                     Math.round((event.loaded / event.total) * 100);
 
                 progressBar.style.width = percent + "%";
-
                 progressBar.textContent = percent + "%";
 
             }
 
         });
 
-
         xhr.onload = function() {
 
             if (xhr.status >= 200 && xhr.status < 300) {
 
-                const result = JSON.parse(xhr.responseText);
+                try {
 
-                resolve(result);
+                    const result =
+                        JSON.parse(xhr.responseText);
+
+                    resolve(result);
+
+                }
+                catch (error) {
+
+                    reject(
+                        new Error(
+                            "Invalid response from Cloudinary."
+                        )
+                    );
+
+                }
 
             }
             else {
@@ -312,15 +374,15 @@ function uploadToCloudinary(file, signatureData, resourceType) {
 
         };
 
-
         xhr.onerror = function() {
 
             reject(
-                new Error("Network error while uploading.")
+                new Error(
+                    "Network error while uploading."
+                )
             );
 
         };
-
 
         const formData = new FormData();
 
@@ -341,7 +403,6 @@ function uploadToCloudinary(file, signatureData, resourceType) {
             signatureData.signature
         );
 
-
         xhr.send(formData);
 
     });
@@ -349,132 +410,426 @@ function uploadToCloudinary(file, signatureData, resourceType) {
 }
 
 
-form.addEventListener("submit", async function(event) {
+/* =========================================================
+   CHUNKED VIDEO UPLOAD
+========================================================= */
 
-    event.preventDefault();
+function uploadVideoInChunks(file) {
 
+    return new Promise(async (resolve, reject) => {
 
-    const video = videoFile.files[0];
+        const chunkSize = 6 * 1024 * 1024; // 6 MB
+        const totalSize = file.size;
 
-    const thumbnail = thumbnailFile.files[0];
+        let start = 0;
+        let chunkNumber = 0;
 
+        const uniqueUploadId = crypto.randomUUID();
 
-    if (!video) {
+        try {
 
-        alert("Please select a video.");
+            while (start < totalSize) {
 
-        return;
+                const end = Math.min(
+                    start + chunkSize,
+                    totalSize
+                );
 
-    }
+                const chunk = file.slice(start, end);
 
+                chunkNumber++;
 
-    if (!thumbnail) {
+                showStatus(
+                    `🎥 Uploading video... Chunk ${chunkNumber}`
+                );
 
-        alert("Please select a thumbnail.");
+                /*
+                 * Get a fresh Cloudinary signature
+                 * for this chunk.
+                 */
 
-        return;
-
-    }
-
-
-    try {
-
-        uploadButton.disabled = true;
-
-        progressContainer.classList.remove("d-none");
-
-
-        // ==========================
-        // GET SIGNATURE
-        // ==========================
-
-        showStatus(
-            "🔐 Preparing secure Cloudinary upload..."
-        );
-
-        const signatureData = await getSignature();
+                const chunkSignature =
+                    await getSignature();
 
 
-        // ==========================
-        // UPLOAD VIDEO
-        // ==========================
+                await new Promise((chunkResolve, chunkReject) => {
 
-        showStatus(
-            "🎥 Uploading video directly to Cloudinary..."
-        );
+                    const xhr = new XMLHttpRequest();
 
-        progressBar.style.width = "0%";
-
-        progressBar.textContent = "0%";
+                    const uploadUrl =
+                        `https://api.cloudinary.com/v1_1/${chunkSignature.cloud_name}/video/upload`;
 
 
-        const videoResult =
-            await uploadToCloudinary(
-                video,
-                signatureData,
-                "video"
+                    xhr.open("POST", uploadUrl);
+
+
+                    /*
+                     * Identify this chunked upload
+                     */
+
+                    xhr.setRequestHeader(
+                        "X-Unique-Upload-Id",
+                        uniqueUploadId
+                    );
+
+
+                    /*
+                     * Tell Cloudinary which bytes
+                     * this chunk contains.
+                     */
+
+                    xhr.setRequestHeader(
+                        "Content-Range",
+                        `bytes ${start}-${end - 1}/${totalSize}`
+                    );
+
+
+                    /*
+                     * Progress
+                     */
+
+                    xhr.upload.addEventListener(
+                        "progress",
+                        function(event) {
+
+                            if (event.lengthComputable) {
+
+                                const chunkPercent =
+                                    event.loaded / event.total;
+
+                                const overallPercent =
+                                    Math.round(
+                                        (
+                                            (
+                                                start +
+                                                (
+                                                    chunkPercent *
+                                                    (end - start)
+                                                )
+                                            ) /
+                                            totalSize
+                                        ) * 100
+                                    );
+
+                                progressBar.style.width =
+                                    overallPercent + "%";
+
+                                progressBar.textContent =
+                                    overallPercent + "%";
+
+                            }
+
+                        }
+                    );
+
+
+                    /*
+                     * Response
+                     */
+
+                    xhr.onload = function() {
+
+                        if (
+                            xhr.status >= 200 &&
+                            xhr.status < 300
+                        ) {
+
+                            try {
+
+                                const result =
+                                    JSON.parse(
+                                        xhr.responseText
+                                    );
+
+
+                                /*
+                                 * Last chunk should return
+                                 * the final Cloudinary result.
+                                 */
+
+                                if (end >= totalSize) {
+
+                                    if (!result.secure_url) {
+
+                                        chunkReject(
+                                            new Error(
+                                                "Cloudinary did not return a video URL."
+                                            )
+                                        );
+
+                                        return;
+                                    }
+
+
+                                    chunkResolve();
+
+                                    resolve(result);
+
+                                }
+                                else {
+
+                                    chunkResolve();
+
+                                }
+
+                            }
+                            catch (error) {
+
+                                chunkReject(
+                                    new Error(
+                                        "Invalid response from Cloudinary."
+                                    )
+                                );
+
+                            }
+
+                        }
+                        else {
+
+                            chunkReject(
+                                new Error(
+                                    "Cloudinary chunk upload failed: " +
+                                    xhr.responseText
+                                )
+                            );
+
+                        }
+
+                    };
+
+
+                    /*
+                     * Network error
+                     */
+
+                    xhr.onerror = function() {
+
+                        chunkReject(
+                            new Error(
+                                "Network error while uploading video chunk."
+                            )
+                        );
+
+                    };
+
+
+                    /*
+                     * Prepare request
+                     */
+
+                    const formData =
+                        new FormData();
+
+
+                    formData.append(
+                        "file",
+                        chunk,
+                        file.name
+                    );
+
+
+                    formData.append(
+                        "api_key",
+                        chunkSignature.api_key
+                    );
+
+
+                    formData.append(
+                        "timestamp",
+                        chunkSignature.timestamp
+                    );
+
+
+                    formData.append(
+                        "signature",
+                        chunkSignature.signature
+                    );
+
+
+                    xhr.send(formData);
+
+                });
+
+
+                /*
+                 * Move to next chunk
+                 */
+
+                start = end;
+
+            }
+
+        }
+        catch (error) {
+
+            reject(error);
+
+        }
+
+    });
+
+}
+
+
+/* =========================================================
+   FORM SUBMISSION
+========================================================= */
+
+form.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+
+        const video =
+            videoFile.files[0];
+
+        const thumbnail =
+            thumbnailFile.files[0];
+
+
+        if (!video) {
+
+            alert("Please select a video.");
+
+            return;
+
+        }
+
+
+        if (!thumbnail) {
+
+            alert("Please select a thumbnail.");
+
+            return;
+
+        }
+
+
+        try {
+
+            uploadButton.disabled = true;
+
+            progressContainer.classList.remove("d-none");
+
+
+            /* ============================================
+               GET VIDEO SIGNATURE
+            ============================================ */
+
+            showStatus(
+                "🔐 Preparing secure Cloudinary upload..."
+            )
+
+
+            /* ============================================
+               CHUNKED VIDEO UPLOAD
+            ============================================ */
+
+            progressBar.style.width = "0%";
+            progressBar.textContent = "0%";
+
+
+            const videoResult =
+    await uploadVideoInChunks(video);
+
+
+            if (!videoResult.secure_url) {
+
+                throw new Error(
+                    "Cloudinary did not return a video URL."
+                );
+
+            }
+
+
+            videoUrl.value =
+                videoResult.secure_url;
+
+
+            /* ============================================
+               THUMBNAIL
+            ============================================ */
+
+            showStatus(
+                "🖼 Uploading thumbnail..."
             );
 
 
-        videoUrl.value = videoResult.secure_url;
+            progressBar.style.width = "0%";
+            progressBar.textContent = "0%";
 
 
-        // ==========================
-        // UPLOAD THUMBNAIL
-        // ==========================
-
-        showStatus(
-            "🖼 Uploading thumbnail..."
-        );
+            const thumbnailSignature =
+                await getSignature();
 
 
-        progressBar.style.width = "0%";
+            const thumbnailResult =
+                await uploadToCloudinary(
+                    thumbnail,
+                    thumbnailSignature,
+                    "image"
+                );
 
-        progressBar.textContent = "0%";
+
+            if (!thumbnailResult.secure_url) {
+
+                throw new Error(
+                    "Cloudinary did not return a thumbnail URL."
+                );
+
+            }
 
 
-        const thumbnailSignature =
-            await getSignature();
+            thumbnailUrl.value =
+                thumbnailResult.secure_url;
 
 
-        const thumbnailResult =
-            await uploadToCloudinary(
-                thumbnail,
-                thumbnailSignature,
-                "image"
+            /* ============================================
+               SEND ONLY TEXT + CLOUDINARY URLS
+            ============================================ */
+
+            showStatus(
+                "💾 Saving video information..."
             );
 
 
-        thumbnailUrl.value =
-            thumbnailResult.secure_url;
+            /*
+             * VERY IMPORTANT:
+             *
+             * Disable the actual file inputs.
+             *
+             * Otherwise form.submit() would send
+             * the 202 MB video to Vercel again.
+             */
+
+            videoFile.disabled = true;
+            thumbnailFile.disabled = true;
 
 
-        // ==========================
-        // SEND ONLY TEXT + URLS
-        // ==========================
-
-        showStatus(
-            "💾 Saving video information..."
-        );
+            progressBar.style.width = "100%";
+            progressBar.textContent = "100%";
 
 
-        form.submit();
+            form.submit();
+
+        }
+        catch (error) {
+
+            console.error(error);
+
+            showStatus(
+                "❌ Upload failed: " + error.message,
+                "danger"
+            );
+
+            uploadButton.disabled = false;
+
+        }
 
     }
-    catch (error) {
-
-        console.error(error);
-
-        showStatus(
-            "❌ Upload failed: " + error.message,
-            "danger"
-        );
-
-        uploadButton.disabled = false;
-
-    }
-
-});
+);
 
 </script>
 
