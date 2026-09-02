@@ -41,3 +41,4 @@ urllib3==2.7.0
 Werkzeug==3.1.5
 wsproto==1.3.2
 redis
+simple-websocket

@@ -301,12 +301,14 @@ Welcome,
 
 <script>
 
-const socket = io();
+// Socket.IO
+const socket = io({
+    transports: ["websocket"],
+    upgrade: false
+});
 
 const isHost = {{ 'true' if username == host else 'false' }};
-
 const roomId = "{{ room_id }}";
-
 const username = "{{ username }}";
 
 const video = document.getElementById("videoPlayer");
