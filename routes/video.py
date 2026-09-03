@@ -27,6 +27,7 @@ import os
 import cloudinary
 import cloudinary.uploader
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 cloudinary.config(
     cloudinary_url=os.environ.get("CLOUDINARY_URL")
@@ -137,11 +138,12 @@ def watch_video(video_id):
         user = User.query.get(session["user_id"])
 
         new_comment = Comment(
-            video_id=video_id,
-            username=session["username"],
-            comment=comment_text,
-            language=detected_language,
-            show_location=user.show_location
+    video_id=video_id,
+    username=session["username"],
+    comment=comment_text,
+    language=detected_language,
+    show_location=user.show_location,
+    created_at=datetime.utcnow()
 )
 
         db.session.add(new_comment)
@@ -160,9 +162,21 @@ def watch_video(video_id):
     ).all()
 
     for comment in comments:
+
+        # Get comment author
         comment.author = User.query.filter_by(
             username=comment.username
     ).first()
+
+    # Convert database time (UTC) to IST
+        if comment.created_at:
+            comment.created_at_ist = comment.created_at.replace(
+                tzinfo=ZoneInfo("UTC")
+            ).astimezone(
+                ZoneInfo("Asia/Kolkata")
+            )
+        else:
+            comment.created_at_ist = None
     
     # ===========================
 # NEXT VIDEO
@@ -610,12 +624,9 @@ def download_video(video_id):
 
     db.session.commit()
 
-    return send_from_directory(
+    download_url = video_data.filename.replace(
+    "/upload/",
+    "/upload/fl_attachment/"
+)
 
-        UPLOAD_FOLDER,
-
-        video_data.filename,
-
-        as_attachment=True
-
-    )
+    return redirect(download_url)

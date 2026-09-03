@@ -670,10 +670,10 @@ Post Comment
 
 <small class="text-muted">
 
-🕒 {{ comment.created_at.strftime("%d %b %Y • %I:%M %p") if comment.created_at else "" }}
+🕒 {{ comment.created_at_ist.strftime("%d %b %Y • %I:%M %p") if comment.created_at_ist else "" }}
 
-{% if comment.author and comment.author.show_location and comment.author.last_city and comment.author.last_state %}
-    📍 {{ comment.author.last_city }}, {{ comment.author.last_state }}
+{% if comment.author and comment.author.show_location and comment.author.last_state %}
+    📍 {{ comment.author.last_state }}
 {% endif %}
 
 </small>

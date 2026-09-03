@@ -237,12 +237,15 @@ def login():
 
         current_device = request.headers.get("User-Agent")
 
-        ip = request.remote_addr
+        ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+
+        if "," in ip:
+            ip = ip.split(",")[0].strip()
 
         try:
 
             response = requests.get(
-                f"http://ip-api.com/json/{ip}",
+                f"https://ip-api.com/json/{ip}",
                 timeout=5
             ).json()
 
@@ -368,18 +371,23 @@ def verify_login_otp(email):
 
         current_device = request.headers.get("User-Agent")
 
-        ip = request.remote_addr
+        ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+
+        if "," in ip:
+            ip = ip.split(",")[0].strip()
 
         try:
             response = requests.get(
-                f"http://ip-api.com/json/{ip}",
+                f"https://ip-api.com/json/{ip}",
                 timeout=5
             ).json()
 
             current_city = response.get("city", "")
             current_state = response.get("regionName", "")
 
+
         except:
+            
             current_city = ""
             current_state = ""
 
