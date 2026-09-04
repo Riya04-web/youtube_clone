@@ -2,11 +2,16 @@ from flask import Flask, render_template, session, redirect, url_for, request
 from config import Config
 from extensions import db, mail, socketio
 from flask_mail import Message
+import cloudinary
 
 app = Flask(__name__)
 
 app.config.from_object(Config)
-
+cloudinary.config(
+    cloud_name=app.config["CLOUDINARY_CLOUD_NAME"],
+    api_key=app.config["CLOUDINARY_API_KEY"],
+    api_secret=app.config["CLOUDINARY_API_SECRET"]
+)
 
 socketio.init_app(app)
 

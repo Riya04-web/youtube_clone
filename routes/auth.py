@@ -512,19 +512,23 @@ def edit_profile():
         user.username = username
 
         # Upload profile picture
-        if "profile_pic" in request.files:
+        # Upload profile picture to Cloudinary
+    if "profile_pic" in request.files:
+        file = request.files["profile_pic"]
 
-            file = request.files["profile_pic"]
+        if file and file.filename != "":
+            import cloudinary.uploader
 
-            if file.filename != "":
+            result = cloudinary.uploader.upload(
+                file,
+                folder="youtube_clone/profile_pics"
+        )
 
-                filename = secure_filename(file.filename)
+            profile_pic_url = result.get("secure_url")
 
-                file.save(os.path.join("static/profile_pics", filename))
-
-                user.profile_pic = filename
-                
-                session["profile_pic"] = filename
+            if profile_pic_url:
+                user.profile_pic = profile_pic_url
+                session["profile_pic"] = profile_pic_url
 
         db.session.commit()
 

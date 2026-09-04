@@ -75,10 +75,7 @@ href="{{ url_for('static', filename='css/theme.css') }}">
 
 
 <img
-
-src="{{ url_for('static',
-filename='profile_pics/' + user.profile_pic) }}"
-
+src="{{ user.profile_pic if user.profile_pic and user.profile_pic.startswith('http') else url_for('static', filename='profile_pics/' + (user.profile_pic or 'default.png')) }}"
 class="rounded-circle profile-img">
 
 
