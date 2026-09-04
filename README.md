@@ -421,36 +421,6 @@ For production deployment, additional security measures should be implemented, i
 
 ---
 
-## 📸 Screenshots
-
-Screenshots can be added here to demonstrate the application's interface.
-
-### Home Page
-
-*Add screenshot here*
-
-### Login / Registration
-
-*Add screenshot here*
-
-### Video Watch Page
-
-*Add screenshot here*
-
-### Video Upload
-
-*Add screenshot here*
-
-### Subscription
-
-*Add screenshot here*
-
-### Comments
-
-*Add screenshot here*
-
----
-
 ## 🎯 Learning Objectives
 
 Through this project, I worked with:
