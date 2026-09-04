@@ -149,6 +149,11 @@ def watch_video(video_id):
     created_at=datetime.utcnow()
 )
 
+        print("USER SHOW LOCATION:", user.show_location)
+        print("USER CITY:", user.last_city)
+        print("USER STATE:", user.last_state)
+        print("COMMENT SHOW LOCATION:", new_comment.show_location)
+
         db.session.add(new_comment)
         db.session.commit()
 

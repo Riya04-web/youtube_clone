@@ -672,8 +672,12 @@ Post Comment
 
 🕒 {{ comment.created_at_ist.strftime("%d %b %Y • %I:%M %p") if comment.created_at_ist else "" }}
 
-{% if comment.author and comment.author.show_location and comment.author.last_state %}
-    📍 {{ comment.author.last_state }}
+{% if comment.show_location and comment.author %}
+    {% if comment.author.last_city and comment.author.last_state %}
+        📍 {{ comment.author.last_city }}, {{ comment.author.last_state }}
+    {% elif comment.author.last_state %}
+        📍 {{ comment.author.last_state }}
+    {% endif %}
 {% endif %}
 
 </small>

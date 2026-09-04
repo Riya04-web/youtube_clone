@@ -553,16 +553,11 @@ class="btn btn-light rounded-pill me-3">
 <a href="{{ url_for('auth.profile') }}">
 
 <img
-
-src="{{ url_for('static', filename='profile_pics/' + session.get('profile_pic','default.png')) }}"
-
-width="48"
-
-height="48"
-
-class="rounded-circle border border-3 border-white"
-
-style="object-fit:cover;">
+    src="{{ session.get('profile_pic') if session.get('profile_pic') and session.get('profile_pic').startswith('http') else url_for('static', filename='profile_pics/' + (session.get('profile_pic') or 'default.png')) }}"
+    width="48"
+    height="48"
+    class="rounded-circle border border-3 border-white"
+    style="object-fit:cover;">
 
 </a>
 

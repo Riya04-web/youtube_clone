@@ -237,26 +237,46 @@ def login():
 
         current_device = request.headers.get("User-Agent")
 
-        ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+        ip = request.headers.get("X-Forwarded-For")
 
-        if "," in ip:
+        if ip:
             ip = ip.split(",")[0].strip()
+        else:
+            ip = request.remote_addr
+
+        # Get public IP when running locally
+        if ip in ["127.0.0.1", "::1"] or ip.startswith("192.168.") or ip.startswith("10."):
+            try:
+                ip = requests.get(
+                    "https://api.ipify.org",
+                    timeout=5
+                ).text.strip()
+            except Exception:
+                ip = None
+
+        current_city = ""
+        current_state = ""
 
         try:
+            if ip:
+                response = requests.get(
+                    f"https://ipwho.is/{ip}",
+                    timeout=5
+                ).json()
 
-            response = requests.get(
-                f"https://ip-api.com/json/{ip}",
-                timeout=5
-            ).json()
+                print("DETECTED IP:", ip)
+                print("LOCATION RESPONSE:", response)
 
-            current_city = response.get("city", "")
-            current_state = response.get("regionName", "")
+                if response.get("success"):
+                    current_city = response.get("city", "")
+                    current_state = response.get("region", "")
 
-        except:
+                print("CITY:", current_city)
+                print("STATE:", current_state)
 
-            current_city = ""
-            current_state = ""
-
+        except Exception as e:
+            print("LOCATION ERROR:", e)
+        
                 # Check if device or location has changed
         new_login = False
 
@@ -371,25 +391,46 @@ def verify_login_otp(email):
 
         current_device = request.headers.get("User-Agent")
 
-        ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+        ip = request.headers.get(
+            "X-Forwarded-For",
+            request.remote_addr
+        )
 
         if "," in ip:
             ip = ip.split(",")[0].strip()
 
+        # Get public IP when running locally
+        if ip in ["127.0.0.1", "::1"] or ip.startswith("192.168.") or ip.startswith("10."):
+            try:
+                ip = requests.get(
+                    "https://api.ipify.org",
+                    timeout=5
+                ).text.strip()
+            except Exception:
+                ip = None
+
+        current_city = ""
+        current_state = ""
+
         try:
-            response = requests.get(
-                f"https://ip-api.com/json/{ip}",
-                timeout=5
-            ).json()
+            if ip:
+                response = requests.get(
+                    f"https://ipwho.is/{ip}",
+                    timeout=5
+                ).json()
 
-            current_city = response.get("city", "")
-            current_state = response.get("regionName", "")
+                print("OTP DETECTED IP:", ip)
+                print("OTP LOCATION RESPONSE:", response)
 
+                if response.get("success"):
+                    current_city = response.get("city", "")
+                    current_state = response.get("region", "")
 
-        except:
-            
-            current_city = ""
-            current_state = ""
+                print("OTP CITY:", current_city)
+                print("OTP STATE:", current_state)
+
+        except Exception as e:
+            print("OTP LOCATION ERROR:", e)
 
         # Automatic theme selection (based on IST)
         if not user.theme:
