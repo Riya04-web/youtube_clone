@@ -498,11 +498,95 @@ footer small.text-secondary{
  
     background:#ff0000;
 }
+
+/* ================= LIGHT THEME ================= */
+
+body.light-theme{
+    background:#f5f5f5 !important;
+    color:#222 !important;
+}
+
+body.light-theme .navbar{
+    background:#ffffff !important;
+    border-bottom:1px solid #e5e5e5;
+    box-shadow:0 4px 20px rgba(0,0,0,.08);
+}
+
+body.light-theme .navbar-brand{
+    color:#222 !important;
+}
+
+body.light-theme .search-box{
+    background:#ffffff;
+    color:#222;
+    border:1px solid #ccc;
+}
+
+body.light-theme .search-box::placeholder{
+    color:#777;
+}
+
+body.light-theme .welcome-card,
+body.light-theme .stats-card,
+body.light-theme .video-card{
+    background:#ffffff;
+    color:#222;
+    border:1px solid #e5e5e5;
+    box-shadow:0 10px 26px rgba(0,0,0,.08);
+}
+
+body.light-theme .welcome-card h2,
+body.light-theme .stats-card h3,
+body.light-theme .video-title{
+    color:#222 !important;
+}
+
+body.light-theme .welcome-card p,
+body.light-theme .stats-card p,
+body.light-theme .video-desc,
+body.light-theme .video-card p,
+body.light-theme .video-card small{
+    color:#666 !important;
+}
+
+body.light-theme .video-card .d-flex.justify-content-between span{
+    background:#f1f1f1;
+    color:#333 !important;
+}
+
+body.light-theme .section-title,
+body.light-theme h2.fw-bold{
+    color:#222 !important;
+}
+
+body.light-theme footer{
+    background:#ffffff !important;
+    color:#222 !important;
+    border-top:1px solid #ddd;
+}
+
+body.light-theme footer h4,
+body.light-theme footer h5{
+    color:#222 !important;
+}
+
+body.light-theme footer p,
+body.light-theme footer .text-light{
+    color:#666 !important;
+}
+
+body.light-theme footer a{
+    color:#444 !important;
+}
+
+body.light-theme footer hr{
+    border-color:#ddd;
+}
 </style>
 
 </head>
 
-<body class="{% if session.get('theme') == 'dark' %}bg-dark text-white{% else %}bg-light text-dark{% endif %}"></body>
+<body class="{% if session.get('theme') == 'light' %}light-theme{% else %}dark-theme{% endif %}">
 
     <!-- ================= NAVBAR ================= -->
 
