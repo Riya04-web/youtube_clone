@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, redirect, url_for, send_from_directory
+from flask import Blueprint, render_template, session, redirect, url_for, send_from_directory, send_file
 from models.user import User
 from extensions import db
 import razorpay
@@ -18,13 +18,34 @@ subscription = Blueprint(
     __name__
 )
 
-@subscription.route("/download_invoice/<filename>")
-def download_invoice(filename):
+@subscription.route("/download_invoice")
+def download_invoice():
 
-    return send_from_directory(
-        "static/invoices",
-        filename,
-        as_attachment=True
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
+
+    user = User.query.get(session["user_id"])
+
+    if not user:
+        return redirect(url_for("auth.login"))
+
+    if not user.payment_id:
+        return "Invoice not available"
+
+    if not user.plan or user.plan.lower() == "free":
+        return "Invoice not available"
+
+    invoice_file = generate_invoice(
+        user,
+        user.plan,
+        user.payment_id
+    )
+
+    return send_file(
+        invoice_file,
+        as_attachment=True,
+        download_name=f"invoice_{user.payment_id}.pdf",
+        mimetype="application/pdf"
     )
 
 print("RAZORPAY KEY ID:", Config.RAZORPAY_KEY_ID)

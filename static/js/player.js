@@ -51,7 +51,6 @@ updatePlayButtons();
 
 playBtn.addEventListener("click", togglePlay);
 centerPlay.addEventListener("click", togglePlay);
-video.addEventListener("click", togglePlay);
 video.addEventListener("dblclick", () => {
 
     if(!document.fullscreenElement){
@@ -68,14 +67,22 @@ video.addEventListener("dblclick", () => {
 
 // 📱 Mobile double-tap gestures
 
+// 📱 MOBILE DOUBLE-TAP GESTURES
+// Left side  → Rewind 10 seconds
+// Right side → Forward 10 seconds
+
 let lastTap = 0;
+let tapTimer = null;
 
 video.addEventListener("touchend", (e) => {
 
-    const currentTime = new Date().getTime();
+    const currentTime = Date.now();
+
     const tapLength = currentTime - lastTap;
 
     if (tapLength < 300 && tapLength > 0) {
+
+        clearTimeout(tapTimer);
 
         const touch = e.changedTouches[0];
 
@@ -85,7 +92,7 @@ video.addEventListener("touchend", (e) => {
 
         const videoWidth = rect.width;
 
-        // 👈 Double tap on LEFT → rewind 10 seconds
+        // LEFT SIDE → REWIND
         if (tapX < videoWidth / 2) {
 
             video.currentTime = Math.max(
@@ -93,17 +100,34 @@ video.addEventListener("touchend", (e) => {
                 video.currentTime - 10
             );
 
+            showControls();
+
         }
 
-        // 👉 Double tap on RIGHT → forward 10 seconds
+        // RIGHT SIDE → FORWARD
         else {
 
-            video.currentTime = Math.min(
-                video.duration || 0,
-                video.currentTime + 10
-            );
+            if (video.duration) {
+
+                video.currentTime = Math.min(
+                    video.duration,
+                    video.currentTime + 10
+                );
+
+            }
+
+            showControls();
 
         }
+
+    } else {
+
+        // Normal single tap
+        tapTimer = setTimeout(() => {
+
+            togglePlay();
+
+        }, 250);
 
     }
 

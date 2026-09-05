@@ -271,36 +271,24 @@ Your payment receipt is ready.
 
 </p>
 
+{% if user.payment_id and user.plan and user.plan.lower() != "free" %}
 
+<a href="{{ url_for('subscription.download_invoice') }}"
+   class="btn btn-success px-4">
 
-{% if user.invoice_file %}
-
-
-<a href="{{ url_for('subscription.download_invoice',
-filename=user.invoice_file) }}"
-
-class="btn btn-success px-4">
-
-
-⬇ Download Invoice PDF
-
+    ⬇ Download Invoice PDF
 
 </a>
 
-
 {% else %}
-
 
 <p class="text-muted">
 
-Invoice not available
+    Invoice not available
 
 </p>
 
-
 {% endif %}
-
-
 
 </div>
 
